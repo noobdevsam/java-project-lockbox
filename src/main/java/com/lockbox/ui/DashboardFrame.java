@@ -37,12 +37,15 @@ public class DashboardFrame extends JFrame {
         });
 
         // Top Panel: Actions
-        JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         JButton btnAdd = new JButton("Add Entry");
+        btnAdd.putClientProperty("JButton.buttonType", "roundRect");
         btnAdd.addActionListener(e -> showAddEditDialog(null));
         JButton btnGen = new JButton("Password Generator");
+        btnGen.putClientProperty("JButton.buttonType", "roundRect");
         btnGen.addActionListener(e -> new PasswordGeneratorDialog(this).setVisible(true));
         JButton btnLogout = new JButton("Logout");
+        btnLogout.putClientProperty("JButton.buttonType", "roundRect");
         btnLogout.addActionListener(e -> logout());
 
         pnlTop.add(btnAdd);
@@ -59,17 +62,26 @@ public class DashboardFrame extends JFrame {
         };
         table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(table.getTableHeader().getFont().deriveFont(Font.BOLD));
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        add(scrollPane, BorderLayout.CENTER);
 
         // Bottom Panel: Context Actions
-        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         JButton btnCopy = new JButton("Copy Password");
+        btnCopy.putClientProperty("JButton.buttonType", "roundRect");
         btnCopy.addActionListener(e -> copySelectedPassword());
         JButton btnView = new JButton("View Password");
+        btnView.putClientProperty("JButton.buttonType", "roundRect");
         btnView.addActionListener(e -> viewSelectedPassword());
         JButton btnEdit = new JButton("Edit");
+        btnEdit.putClientProperty("JButton.buttonType", "roundRect");
         btnEdit.addActionListener(e -> editSelectedEntry());
         JButton btnDelete = new JButton("Delete");
+        btnDelete.putClientProperty("JButton.buttonType", "roundRect");
+        btnDelete.setForeground(new Color(255, 100, 100));
         btnDelete.addActionListener(e -> deleteSelectedEntry());
 
         pnlBottom.add(btnCopy);
@@ -78,7 +90,7 @@ public class DashboardFrame extends JFrame {
         pnlBottom.add(btnDelete);
         add(pnlBottom, BorderLayout.SOUTH);
 
-        setSize(800, 600);
+        setSize(900, 600);
         setLocationRelativeTo(null);
         refreshTable();
     }
@@ -88,8 +100,16 @@ public class DashboardFrame extends JFrame {
         try {
             currentEntries = vaultDAO.getAllEntries();
             for (VaultEntry entry : currentEntries) {
-                String decUser = new String(CryptoUtil.decrypt(entry.getUsername().getBytes(StandardCharsets.UTF_8),
-                        masterKey, entry.getIv()), StandardCharsets.UTF_8);
+                String b64User = entry.getUsername();
+                String decUser = "Error";
+                try {
+                    byte[] userPayload = java.util.Base64.getDecoder().decode(b64User);
+                    byte[] userIv = Arrays.copyOfRange(userPayload, 0, 12);
+                    byte[] userCipher = Arrays.copyOfRange(userPayload, 12, userPayload.length);
+                    decUser = new String(CryptoUtil.decrypt(userCipher, masterKey, userIv), StandardCharsets.UTF_8);
+                } catch (Exception e) {
+                    decUser = "Decryption Failed";
+                }
                 tableModel.addRow(new Object[] { entry.getId(), entry.getSiteName(), decUser, "••••••" });
             }
         } catch (Exception ex) {
@@ -118,9 +138,10 @@ public class DashboardFrame extends JFrame {
         if (entryToEdit != null) {
             txtSite.setText(entryToEdit.getSiteName());
             try {
-                txtUser.setText(
-                        new String(CryptoUtil.decrypt(entryToEdit.getUsername().getBytes(StandardCharsets.UTF_8),
-                                masterKey, entryToEdit.getIv()), StandardCharsets.UTF_8));
+                byte[] userPayload = java.util.Base64.getDecoder().decode(entryToEdit.getUsername());
+                byte[] userIv = Arrays.copyOfRange(userPayload, 0, 12);
+                byte[] userCipher = Arrays.copyOfRange(userPayload, 12, userPayload.length);
+                txtUser.setText(new String(CryptoUtil.decrypt(userCipher, masterKey, userIv), StandardCharsets.UTF_8));
                 txtPass.setText(
                         new String(CryptoUtil.decrypt(entryToEdit.getPasswordBlob(), masterKey, entryToEdit.getIv()),
                                 StandardCharsets.UTF_8));
@@ -129,26 +150,31 @@ public class DashboardFrame extends JFrame {
         }
 
         JButton btnSave = new JButton("Save");
+        btnSave.putClientProperty("JButton.buttonType", "roundRect");
         btnSave.addActionListener(e -> {
             try {
-                byte[] iv = CryptoUtil.generateIV();
-                byte[] encUser = CryptoUtil.encrypt(txtUser.getText().getBytes(StandardCharsets.UTF_8), masterKey, iv);
+                byte[] passIv = CryptoUtil.generateIV();
                 byte[] encPass = CryptoUtil.encrypt(new String(txtPass.getPassword()).getBytes(StandardCharsets.UTF_8),
-                        masterKey, iv);
+                        masterKey, passIv);
 
                 // Need username as String for DB
-                // Wait, username encryption: let's store encrypted username as Base64 or Hex,
-                // OR keep it text and just encrypt password?
-                // Requirements: "username: TEXT (Encrypted)"
-                String b64User = java.util.Base64.getEncoder().encodeToString(encUser);
+                byte[] userIv = CryptoUtil.generateIV();
+                byte[] encUser = CryptoUtil.encrypt(txtUser.getText().getBytes(StandardCharsets.UTF_8), masterKey,
+                        userIv);
+
+                byte[] userPayload = new byte[userIv.length + encUser.length];
+                System.arraycopy(userIv, 0, userPayload, 0, userIv.length);
+                System.arraycopy(encUser, 0, userPayload, userIv.length, encUser.length);
+
+                String b64User = java.util.Base64.getEncoder().encodeToString(userPayload);
 
                 if (entryToEdit == null) {
-                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, iv));
+                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, passIv));
                 } else {
                     entryToEdit.setSiteName(txtSite.getText());
                     entryToEdit.setUsername(b64User);
                     entryToEdit.setPasswordBlob(encPass);
-                    entryToEdit.setIv(iv);
+                    entryToEdit.setIv(passIv);
                     vaultDAO.updateEntry(entryToEdit);
                 }
                 dialog.dispose();

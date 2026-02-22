@@ -22,18 +22,23 @@ public class LoginFrame extends JFrame {
         setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel pnlCenter = new JPanel(new GridLayout(3, 1));
+        JPanel pnlCenter = new JPanel(new GridLayout(3, 1, 10, 10));
+        pnlCenter.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
 
-        JLabel lblPass = new JLabel("Master Password:", SwingConstants.CENTER);
+        JLabel lblPass = new JLabel("Master Password", SwingConstants.CENTER);
+        lblPass.setFont(lblPass.getFont().deriveFont(Font.BOLD, 16f));
         pnlCenter.add(lblPass);
 
         txtPassword = new JPasswordField(20);
         txtPassword.setHorizontalAlignment(SwingConstants.CENTER);
+        txtPassword.setFont(txtPassword.getFont().deriveFont(18f));
         JPanel pnlTxt = new JPanel();
         pnlTxt.add(txtPassword);
         pnlCenter.add(pnlTxt);
 
         btnLogin = new JButton("Login / Register");
+        btnLogin.putClientProperty("JButton.buttonType", "roundRect");
+        btnLogin.setFont(btnLogin.getFont().deriveFont(Font.BOLD, 14f));
         btnLogin.addActionListener(e -> attemptLogin());
         JPanel pnlBtn = new JPanel();
         pnlBtn.add(btnLogin);
@@ -42,10 +47,11 @@ public class LoginFrame extends JFrame {
         add(pnlCenter, BorderLayout.CENTER);
 
         lblStatus = new JLabel(" ", SwingConstants.CENTER);
-        lblStatus.setForeground(Color.RED);
+        lblStatus.setForeground(new Color(255, 100, 100));
+        lblStatus.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         add(lblStatus, BorderLayout.SOUTH);
 
-        setSize(400, 200);
+        setSize(450, 300);
         setLocationRelativeTo(null);
     }
 
