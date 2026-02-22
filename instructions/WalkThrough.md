@@ -3,10 +3,10 @@
 LockBox has been fully implemented based on the Zero-Knowledge Architecture requirements. Below is a summary of the accomplishments and how to run the application.
 
 ## 1. Application Architecture Implemented
-- **Security Logic:** Added AES-256-GCM authenticated encryption through [CryptoUtil.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/security/CryptoUtil.java) and PBKDF2 Key Derivation using HMAC-SHA256 (600,000 iterations) through [KeyDerivation.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/security/KeyDerivation.java).
-- **Database Logic:** Created an SQLite initialization engine mapped through [DatabaseHelper.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/db/DatabaseHelper.java) and a robust [VaultDAO.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/db/VaultDAO.java) supporting complete CRUD (Create, Read, Update, Delete) capability.
+- **Security Logic:** Added AES-256-GCM authenticated encryption through [CryptoUtil.java](java-project-lockbox/src/main/java/com/lockbox/security/CryptoUtil.java) and PBKDF2 Key Derivation using HMAC-SHA256 (600,000 iterations) through [KeyDerivation.java](java-project-lockbox/src/main/java/com/lockbox/security/KeyDerivation.java).
+- **Database Logic:** Created an SQLite initialization engine mapped through [DatabaseHelper.java](java-project-lockbox/src/main/java/com/lockbox/db/DatabaseHelper.java) and a robust [VaultDAO.java](java-project-lockbox/src/main/java/com/lockbox/db/VaultDAO.java) supporting complete CRUD (Create, Read, Update, Delete) capability.
 - **Presentation Logic (UI):** Connected everything into a Java Swing application using FlatLaf Dark theme. Includes Login setup, 5-strike lockout, a dynamic Vault Dashboard, secure clipboard clearing, and an automated Password Generator dialog.
-- **Build Module:** Provided a [pom.xml](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/pom.xml) loaded with JUnit, FlatLaf, SQlite-JDBC, and the `maven-shade-plugin` to assemble everything into a standalone executable.
+- **Build Module:** Provided a [pom.xml](java-project-lockbox/pom.xml) loaded with JUnit, FlatLaf, SQlite-JDBC, and the `maven-shade-plugin` to assemble everything into a standalone executable.
 
 ## 2. Testing Details
 Automated JUnit tests have been provided inside `src/test/java/com/lockbox/security/`:

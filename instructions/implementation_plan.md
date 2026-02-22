@@ -10,33 +10,33 @@ Develop "LockBox", an Automated Secure Password Manager using a Zero-Knowledge A
 ## Proposed Changes
 
 ### Project Setup
-#### [NEW] [pom.xml](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/pom.xml)
+#### [NEW] [pom.xml](java-project-lockbox/pom.xml)
 Maven configuration file to include dependencies for SQLite JDBC, FlatLaf, and JUnit (for testing).
-#### [NEW] [Main.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/Main.java)
+#### [NEW] [Main.java](java-project-lockbox/src/main/java/com/lockbox/Main.java)
 Entry point of the application. Bootstraps the database and launches the `LoginFrame`.
 
 ### Security Module
-#### [NEW] [CryptoUtil.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/security/CryptoUtil.java)
+#### [NEW] [CryptoUtil.java](java-project-lockbox/src/main/java/com/lockbox/security/CryptoUtil.java)
 Handles AES-256-GCM encryption and decryption.
-#### [NEW] [KeyDerivation.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/security/KeyDerivation.java)
+#### [NEW] [KeyDerivation.java](java-project-lockbox/src/main/java/com/lockbox/security/KeyDerivation.java)
 Handles PBKDF2 with HMAC-SHA256 key derivation (600,000 iterations), salt generation, and verification.
 
 ### Database Module
-#### [NEW] [DatabaseHelper.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/db/DatabaseHelper.java)
+#### [NEW] [DatabaseHelper.java](java-project-lockbox/src/main/java/com/lockbox/db/DatabaseHelper.java)
 Manages the SQLite connection and initializes the `vault` and potentially a `config` table (to store the Salt and Master Password Hash).
-#### [NEW] [VaultDAO.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/db/VaultDAO.java)
+#### [NEW] [VaultDAO.java](java-project-lockbox/src/main/java/com/lockbox/db/VaultDAO.java)
 Data Access Object handling CRUD operations for vault entries.
-#### [NEW] [VaultEntry.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/db/VaultEntry.java)
+#### [NEW] [VaultEntry.java](java-project-lockbox/src/main/java/com/lockbox/db/VaultEntry.java)
 Model class for a vault entry (`id`, `site_name`, `username` (encrypted), `password_blob`, `iv`).
 
 ### Presentation Layer (UI)
-#### [NEW] [ClipboardManager.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/ui/ClipboardManager.java)
+#### [NEW] [ClipboardManager.java](java-project-lockbox/src/main/java/com/lockbox/ui/ClipboardManager.java)
 Utility to handle copying passwords to the clipboard and auto-clearing after 30 seconds using a background thread timer.
-#### [NEW] [LoginFrame.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/ui/LoginFrame.java)
+#### [NEW] [LoginFrame.java](java-project-lockbox/src/main/java/com/lockbox/ui/LoginFrame.java)
 Registration and Login screen. Handles Master Password input, derives main key, and implements a progressive time delay lockout on 5 failed attempts.
-#### [NEW] [DashboardFrame.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/ui/DashboardFrame.java)
+#### [NEW] [DashboardFrame.java](java-project-lockbox/src/main/java/com/lockbox/ui/DashboardFrame.java)
 Main vault display (`JTable`) with searchable interface, masking passwords (••••••), and full CRUD actions.
-#### [NEW] [PasswordGeneratorDialog.java](file:///home/sam/MyProjects/JavaProjects/java-project-lockbox/src/main/java/com/lockbox/ui/PasswordGeneratorDialog.java)
+#### [NEW] [PasswordGeneratorDialog.java](java-project-lockbox/src/main/java/com/lockbox/ui/PasswordGeneratorDialog.java)
 UI element to generate cryptographically strong passwords using `java.security.SecureRandom`.
 
 ## Verification Plan
