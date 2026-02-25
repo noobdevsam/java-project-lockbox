@@ -5,9 +5,11 @@ import java.awt.*;
 import java.security.SecureRandom;
 
 public class PasswordGeneratorDialog extends JDialog {
-    private JCheckBox cbUpper, cbNumbers, cbSymbols;
-    private JSpinner spinLength;
-    private JTextField txtResult;
+    private final JCheckBox cbUpper;
+    private final JCheckBox cbNumbers;
+    private final JCheckBox cbSymbols;
+    private final JSpinner spinLength;
+    private final JTextField txtResult;
 
     private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
     private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -50,7 +52,7 @@ public class PasswordGeneratorDialog extends JDialog {
 
         add(pnlBtns, BorderLayout.SOUTH);
 
-        setSize(300, 200);
+        setSize(500, 300);
         setLocationRelativeTo(parent);
     }
 

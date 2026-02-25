@@ -8,18 +8,18 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class LoginFrame extends JFrame {
-    private JPasswordField txtPassword;
-    private JButton btnLogin;
-    private JLabel lblStatus;
+    private final JPasswordField txtPassword;
+    private final JButton btnLogin;
+    private final JLabel lblStatus;
     private int failedAttempts = 0;
-    private VaultDAO vaultDAO;
+    private final VaultDAO vaultDAO;
     private byte[] derivedKey;
 
     public LoginFrame() {
         super("LockBox - Login");
         vaultDAO = new VaultDAO();
 
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(5, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel pnlCenter = new JPanel(new GridLayout(3, 1, 10, 10));
@@ -51,7 +51,7 @@ public class LoginFrame extends JFrame {
         lblStatus.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         add(lblStatus, BorderLayout.SOUTH);
 
-        setSize(450, 300);
+        setSize(800, 600);
         setLocationRelativeTo(null);
     }
 
