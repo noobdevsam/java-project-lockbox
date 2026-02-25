@@ -14,11 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DashboardFrame extends JFrame {
-    private JFrame parentLogin;
-    private byte[] masterKey;
-    private VaultDAO vaultDAO;
-    private DefaultTableModel tableModel;
-    private JTable table;
+    private final JFrame parentLogin;
+    private final byte[] masterKey;
+    private final VaultDAO vaultDAO;
+    private final DefaultTableModel tableModel;
+    private final JTable table;
     private List<VaultEntry> currentEntries;
 
     public DashboardFrame(JFrame parentLogin, byte[] masterKey) {
@@ -54,7 +54,7 @@ public class DashboardFrame extends JFrame {
         add(pnlTop, BorderLayout.NORTH);
 
         // Center Panel: Table
-        tableModel = new DefaultTableModel(new String[] { "ID", "Site", "Username", "Password" }, 0) {
+        tableModel = new DefaultTableModel(new String[]{"Site", "Username", "Password"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -189,6 +189,7 @@ public class DashboardFrame extends JFrame {
 
         dialog.pack();
         dialog.setLocationRelativeTo(this);
+        dialog.setSize(500, 200);
         dialog.setVisible(true);
     }
 
