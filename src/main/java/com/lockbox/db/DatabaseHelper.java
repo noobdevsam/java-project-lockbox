@@ -1,10 +1,10 @@
 package com.lockbox.db;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.io.File;
 
 public class DatabaseHelper {
     private static final String DB_DIR = System.getProperty("user.home") + "/.lockbox";
@@ -20,20 +20,22 @@ public class DatabaseHelper {
              Statement stmt = conn.createStatement()) {
 
             // Create vault table
-            String createVaultTable = "CREATE TABLE IF NOT EXISTS vault (\n"
-                    + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " site_name TEXT NOT NULL,\n"
-                    + " username TEXT NOT NULL,\n"
-                    + " password_blob BLOB NOT NULL,\n"
-                    + " iv BLOB NOT NULL\n"
-                    + ");";
+            String createVaultTable = """
+                    CREATE TABLE IF NOT EXISTS vault (
+                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                     site_name TEXT NOT NULL,
+                     username TEXT NOT NULL,
+                     password_blob BLOB NOT NULL,
+                     iv BLOB NOT NULL
+                    );""";
             stmt.execute(createVaultTable);
 
             // Create config table for Master Password Hash and Salt
-            String createConfigTable = "CREATE TABLE IF NOT EXISTS config (\n"
-                    + " key TEXT PRIMARY KEY,\n"
-                    + " value BLOB NOT NULL\n"
-                    + ");";
+            String createConfigTable = """
+                    CREATE TABLE IF NOT EXISTS config (
+                     key TEXT PRIMARY KEY,
+                     value BLOB NOT NULL
+                    );""";
             stmt.execute(createConfigTable);
 
         } catch (SQLException e) {
