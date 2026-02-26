@@ -37,24 +37,11 @@ public class DashboardFrame extends JFrame {
         });
 
         // Top Panel: Actions
-        JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
-        JButton btnAdd = new JButton("Add Entry");
-        btnAdd.putClientProperty("JButton.buttonType", "roundRect");
-        btnAdd.addActionListener(e -> showAddEditDialog(null));
-        JButton btnGen = new JButton("Password Generator");
-        btnGen.putClientProperty("JButton.buttonType", "roundRect");
-        btnGen.addActionListener(e -> new PasswordGeneratorDialog(this).setVisible(true));
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.putClientProperty("JButton.buttonType", "roundRect");
-        btnLogout.addActionListener(e -> logout());
-
-        pnlTop.add(btnAdd);
-        pnlTop.add(btnGen);
-        pnlTop.add(btnLogout);
+        JPanel pnlTop = getPnlTop();
         add(pnlTop, BorderLayout.NORTH);
 
         // Center Panel: Table
-        tableModel = new DefaultTableModel(new String[]{"Site", "Username", "Password"}, 0) {
+        tableModel = new DefaultTableModel(new String[]{"Id", "Site", "Username", "Password"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -69,6 +56,33 @@ public class DashboardFrame extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         // Bottom Panel: Context Actions
+        JPanel pnlBottom = getPnlBottom();
+        add(pnlBottom, BorderLayout.SOUTH);
+
+        setSize(900, 600);
+        setLocationRelativeTo(null);
+        refreshTable();
+    }
+
+    private JPanel getPnlTop() {
+        JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        JButton btnAdd = new JButton("Add Entry");
+        btnAdd.putClientProperty("JButton.buttonType", "roundRect");
+        btnAdd.addActionListener(e -> showAddEditDialog(null));
+        JButton btnGen = new JButton("Password Generator");
+        btnGen.putClientProperty("JButton.buttonType", "roundRect");
+        btnGen.addActionListener(e -> new PasswordGeneratorDialog(this).setVisible(true));
+        JButton btnLogout = new JButton("Logout");
+        btnLogout.putClientProperty("JButton.buttonType", "roundRect");
+        btnLogout.addActionListener(e -> logout());
+
+        pnlTop.add(btnAdd);
+        pnlTop.add(btnGen);
+        pnlTop.add(btnLogout);
+        return pnlTop;
+    }
+
+    private JPanel getPnlBottom() {
         JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         JButton btnCopy = new JButton("Copy Password");
         btnCopy.putClientProperty("JButton.buttonType", "roundRect");
@@ -88,11 +102,7 @@ public class DashboardFrame extends JFrame {
         pnlBottom.add(btnView);
         pnlBottom.add(btnEdit);
         pnlBottom.add(btnDelete);
-        add(pnlBottom, BorderLayout.SOUTH);
-
-        setSize(900, 600);
-        setLocationRelativeTo(null);
-        refreshTable();
+        return pnlBottom;
     }
 
     private void refreshTable() {
