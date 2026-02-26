@@ -51,7 +51,7 @@ public class LoginFrame extends JFrame {
         lblStatus.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         add(lblStatus, BorderLayout.SOUTH);
 
-        setSize(800, 600);
+        setSize(500, 300);
         setLocationRelativeTo(null);
     }
 
