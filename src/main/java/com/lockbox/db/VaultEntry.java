@@ -22,8 +22,8 @@ public class VaultEntry implements Serializable {
     // New fields for enhanced features
     private String secureNotes;
     private byte[] encryptedDocumentContent;
-    private List<byte[]> passwordHistoryBlobs;
-    private List<byte[]> passwordHistoryIvs;
+    private List<byte[]> passwordHistoryBlobs = new ArrayList<>(); // List of previous password blobs
+    private List<byte[]> passwordHistoryIvs = new ArrayList<>(); // List of IVs corresponding to the password history blobs
 
     // Constructor for existing entries (potentially without history/notes)
     public VaultEntry(int id, String siteName, String username, byte[] passwordBlob, byte[] iv) {
@@ -136,8 +136,8 @@ public class VaultEntry implements Serializable {
                 List<?> byteLists = (List<?>) obj;
                 List<byte[]> result = new ArrayList<>();
                 for (Object item : byteLists) {
-                    if (item instanceof byte[]) {
-                        result.add((byte[]) item);
+                    if (item instanceof byte[] bs) {
+                        result.add(bs);
                     } else {
                         // Handle case where list contains non-byte[] elements if necessary,
                         // though ideally it shouldn't happen if serialized correctly.

@@ -1,17 +1,36 @@
 package com.lockbox.ui;
 
-import com.lockbox.db.VaultDAO;
-import com.lockbox.db.VaultEntry;
-import com.lockbox.security.CryptoUtil;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
+
+import com.lockbox.db.VaultDAO;
+import com.lockbox.db.VaultEntry;
+import com.lockbox.security.CryptoUtil;
 
 public class DashboardFrame extends JFrame {
     private final JFrame parentLogin;
@@ -122,7 +141,7 @@ public class DashboardFrame extends JFrame {
                 }
                 tableModel.addRow(new Object[] { entry.getId(), entry.getSiteName(), decUser, "••••••" });
             }
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error loading vault: " + ex.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
@@ -131,7 +150,8 @@ public class DashboardFrame extends JFrame {
 
     private void showAddEditDialog(VaultEntry entryToEdit) {
         JDialog dialog = new JDialog(this, entryToEdit == null ? "Add Entry" : "Edit Entry", true);
-        dialog.setLayout(new GridLayout(4, 2, 10, 10));
+        // Changed GridLayout to 5 rows to accommodate Secure Notes
+        dialog.setLayout(new GridLayout(5, 2, 10, 10));
 
         dialog.add(new JLabel("Site Name:"));
         JTextField txtSite = new JTextField();
@@ -145,8 +165,18 @@ public class DashboardFrame extends JFrame {
         JPasswordField txtPass = new JPasswordField();
         dialog.add(txtPass);
 
+        // Add Secure Notes field
+        dialog.add(new JLabel("Secure Notes:"));
+        JTextArea txtNotes = new JTextArea();
+        txtNotes.setLineWrap(true); // Enable line wrapping
+        txtNotes.setWrapStyleWord(true); // Wrap at word boundaries
+        JScrollPane scrollPaneNotes = new JScrollPane(txtNotes);
+        dialog.add(scrollPaneNotes);
+
+
         if (entryToEdit != null) {
             txtSite.setText(entryToEdit.getSiteName());
+            txtNotes.setText(entryToEdit.getSecureNotes()); // Populate Secure Notes
             try {
                 byte[] userPayload = java.util.Base64.getDecoder().decode(entryToEdit.getUsername());
                 byte[] userIv = Arrays.copyOfRange(userPayload, 0, 12);
@@ -156,6 +186,8 @@ public class DashboardFrame extends JFrame {
                         new String(CryptoUtil.decrypt(entryToEdit.getPasswordBlob(), masterKey, entryToEdit.getIv()),
                                 StandardCharsets.UTF_8));
             } catch (Exception ignored) {
+                // Handle decryption errors gracefully, maybe show a message or default to empty
+                JOptionPane.showMessageDialog(this, "Error decrypting existing entry data.", "Decryption Error", JOptionPane.WARNING_MESSAGE);
             }
         }
 
@@ -163,15 +195,17 @@ public class DashboardFrame extends JFrame {
         btnSave.putClientProperty("JButton.buttonType", "roundRect");
         btnSave.addActionListener(e -> {
             try {
+                // Generate IV and encrypt password
                 byte[] passIv = CryptoUtil.generateIV();
                 byte[] encPass = CryptoUtil.encrypt(new String(txtPass.getPassword()).getBytes(StandardCharsets.UTF_8),
                         masterKey, passIv);
 
-                // Need username as String for DB
+                // Generate IV and encrypt username
                 byte[] userIv = CryptoUtil.generateIV();
                 byte[] encUser = CryptoUtil.encrypt(txtUser.getText().getBytes(StandardCharsets.UTF_8), masterKey,
                         userIv);
 
+                // Combine IV and cipher text for username payload
                 byte[] userPayload = new byte[userIv.length + encUser.length];
                 System.arraycopy(userIv, 0, userPayload, 0, userIv.length);
                 System.arraycopy(encUser, 0, userPayload, userIv.length, encUser.length);
@@ -179,27 +213,31 @@ public class DashboardFrame extends JFrame {
                 String b64User = java.util.Base64.getEncoder().encodeToString(userPayload);
 
                 if (entryToEdit == null) {
-                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, passIv));
+                    // Use the comprehensive constructor for new entries, including secure notes and default empty values for others
+                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, passIv, txtNotes.getText(), new byte[0], new ArrayList<>(), new ArrayList<>()));
                 } else {
                     entryToEdit.setSiteName(txtSite.getText());
                     entryToEdit.setUsername(b64User);
-                    entryToEdit.setPasswordBlob(encPass);
-                    entryToEdit.setIv(passIv);
+                    // Use setNewPassword to properly manage password history
+                    entryToEdit.setNewPassword(encPass, passIv); // This will add the old password to history
+                    entryToEdit.setSecureNotes(txtNotes.getText()); // Set Secure Notes
+                    // encryptedDocumentContent is not edited here, so it retains its existing value.
                     vaultDAO.updateEntry(entryToEdit);
                 }
                 dialog.dispose();
                 refreshTable();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Encryption error: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Encryption or save error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         });
-        dialog.add(new JLabel()); // spacer
+        dialog.add(new JLabel()); // spacer for the save button row
         dialog.add(btnSave);
 
         dialog.pack();
         dialog.setLocationRelativeTo(this);
-        dialog.setSize(500, 200);
+        // Adjust dialog size to better fit the new components, especially the JTextArea
+        dialog.setSize(500, 350); 
         dialog.setVisible(true);
     }
 
@@ -208,6 +246,7 @@ public class DashboardFrame extends JFrame {
         if (row == -1)
             return null;
         int id = (int) tableModel.getValueAt(row, 0);
+        // Find the entry in the currentEntries list by ID
         return currentEntries.stream().filter(e -> e.getId() == id).findFirst().orElse(null);
     }
 
@@ -216,7 +255,7 @@ public class DashboardFrame extends JFrame {
         if (entry != null) {
             showAddEditDialog(entry);
         } else {
-            JOptionPane.showMessageDialog(this, "Select an entry to edit.");
+            JOptionPane.showMessageDialog(this, "Please select an entry to edit.");
         }
     }
 
@@ -230,7 +269,8 @@ public class DashboardFrame extends JFrame {
                     vaultDAO.deleteEntry(entry.getId());
                     refreshTable();
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Delete error: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(this, "Delete error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
                 }
             }
         }
@@ -240,12 +280,14 @@ public class DashboardFrame extends JFrame {
         VaultEntry entry = getSelectedEntry();
         if (entry != null) {
             try {
+                // Decrypt current password
                 String decrypted = new String(CryptoUtil.decrypt(entry.getPasswordBlob(), masterKey, entry.getIv()),
                         StandardCharsets.UTF_8);
                 ClipboardManager.copyToClipboard(decrypted);
                 JOptionPane.showMessageDialog(this, "Password copied to clipboard (clears in 30s).");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Decryption error: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Decryption error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         }
     }
@@ -254,22 +296,26 @@ public class DashboardFrame extends JFrame {
         VaultEntry entry = getSelectedEntry();
         if (entry != null) {
             try {
+                // Decrypt and display current password
                 String decrypted = new String(CryptoUtil.decrypt(entry.getPasswordBlob(), masterKey, entry.getIv()),
                         StandardCharsets.UTF_8);
-                JOptionPane.showMessageDialog(this, "Password: \n" + decrypted, "View Password",
+                JOptionPane.showMessageDialog(this, "Password: " + decrypted, "View Password",
                         JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Decryption error: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Decryption error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         }
     }
 
     private void logout() {
+        // Clear master key from memory
         Arrays.fill(masterKey, (byte) 0);
+        // Clear clipboard content
         ClipboardManager.clearClipboard();
-        this.dispose();
-        parentLogin.setVisible(true);
-        // Clear login password field manually if possible, or just instantiate new
-        // LoginFrame.
+        this.dispose(); // Close the dashboard window
+        parentLogin.setVisible(true); // Show the login window again
+        // Consider clearing password fields in LoginFrame if it's still instantiated,
+        // or better, instantiate a new LoginFrame here if needed for security.
     }
 }
