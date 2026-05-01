@@ -4,6 +4,7 @@ import com.lockbox.db.VaultDAO;
 import com.lockbox.security.KeyDerivation;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Arrays;
 
@@ -16,43 +17,67 @@ public class LoginFrame extends JFrame {
     private byte[] derivedKey;
 
     public LoginFrame() {
-        super("LockBox - Login");
+        super("LockBox - Secure Login");
         vaultDAO = new VaultDAO();
 
-        setLayout(new BorderLayout(5, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        JPanel pnlCenter = new JPanel(new GridLayout(3, 1, 10, 10));
-        pnlCenter.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBorder(new EmptyBorder(30, 50, 30, 50));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        JLabel lblPass = new JLabel("Master Password", SwingConstants.CENTER);
-        lblPass.setFont(lblPass.getFont().deriveFont(Font.BOLD, 16f));
-        pnlCenter.add(lblPass);
+        // Header
+        JLabel lblHeader = new JLabel("Welcome to LockBox");
+        lblHeader.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblHeader.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        mainPanel.add(lblHeader, gbc);
 
+        JLabel lblSubHeader = new JLabel("Enter your master password to unlock");
+        lblSubHeader.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblSubHeader.setForeground(Color.GRAY);
+        lblSubHeader.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridy = 1;
+        mainPanel.add(lblSubHeader, gbc);
+
+        // Password Field
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(20, 10, 5, 10);
         txtPassword = new JPasswordField(20);
         txtPassword.setHorizontalAlignment(SwingConstants.CENTER);
-        txtPassword.setFont(txtPassword.getFont().deriveFont(18f));
-        JPanel pnlTxt = new JPanel();
-        pnlTxt.add(txtPassword);
-        pnlCenter.add(pnlTxt);
+        txtPassword.putClientProperty("JTextField.placeholderText", "Master Password");
+        txtPassword.putClientProperty("JTextField.showClearButton", true);
+        mainPanel.add(txtPassword, gbc);
 
-        btnLogin = new JButton("Login / Register");
-        btnLogin.putClientProperty("JButton.buttonType", "roundRect");
-        btnLogin.setFont(btnLogin.getFont().deriveFont(Font.BOLD, 14f));
-        btnLogin.addActionListener(e -> attemptLogin());
-        JPanel pnlBtn = new JPanel();
-        pnlBtn.add(btnLogin);
-        pnlCenter.add(pnlBtn);
-
-        add(pnlCenter, BorderLayout.CENTER);
-
-        lblStatus = new JLabel(" ", SwingConstants.CENTER);
+        // Status Label
+        lblStatus = new JLabel(" ");
         lblStatus.setForeground(new Color(255, 100, 100));
-        lblStatus.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        add(lblStatus, BorderLayout.SOUTH);
+        lblStatus.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridy = 3;
+        gbc.insets = new Insets(0, 10, 10, 10);
+        mainPanel.add(lblStatus, gbc);
 
-        setSize(500, 300);
+        // Login Button
+        btnLogin = new JButton("Unlock Vault");
+        btnLogin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnLogin.addActionListener(e -> attemptLogin());
+        gbc.gridy = 4;
+        gbc.ipady = 10;
+        mainPanel.add(btnLogin, gbc);
+
+        add(mainPanel, BorderLayout.CENTER);
+
+        setSize(450, 400);
         setLocationRelativeTo(null);
+        
+        // Window Behavior
+        getRootPane().setDefaultButton(btnLogin);
     }
 
     private void attemptLogin() {
@@ -113,6 +138,6 @@ public class LoginFrame extends JFrame {
     private void openDashboard() {
         DashboardFrame dashboardFrame = new DashboardFrame(this, derivedKey);
         dashboardFrame.setVisible(true);
-        this.setVisible(false); // Hide login
+        this.setVisible(false);
     }
 }

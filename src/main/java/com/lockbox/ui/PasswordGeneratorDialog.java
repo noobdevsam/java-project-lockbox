@@ -1,6 +1,7 @@
 package com.lockbox.ui;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.security.SecureRandom;
 
@@ -18,53 +19,78 @@ public class PasswordGeneratorDialog extends JDialog {
 
     public PasswordGeneratorDialog(JFrame parent) {
         super(parent, "Password Generator", true);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout());
 
-        JPanel pnlOptions = new JPanel(new GridLayout(4, 2));
-        pnlOptions.add(new JLabel("Length:"));
-        spinLength = new JSpinner(new SpinnerNumberModel(16, 8, 128, 1));
-        pnlOptions.add(spinLength);
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBorder(new EmptyBorder(20, 25, 20, 25));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        cbUpper = new JCheckBox("Uppercase", true);
-        pnlOptions.add(cbUpper);
-        cbNumbers = new JCheckBox("Numbers", true);
-        pnlOptions.add(cbNumbers);
-        cbSymbols = new JCheckBox("Symbols", true);
-        pnlOptions.add(cbSymbols);
-
-        add(pnlOptions, BorderLayout.NORTH);
-
-        txtResult = new JTextField();
+        // Result Field
+        txtResult = new JTextField(20);
         txtResult.setEditable(false);
-        add(txtResult, BorderLayout.CENTER);
+        txtResult.setHorizontalAlignment(SwingConstants.CENTER);
+        txtResult.setFont(new Font("Monospaced", Font.BOLD, 18));
+        txtResult.setPreferredSize(new Dimension(0, 50));
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        mainPanel.add(txtResult, gbc);
 
-        JPanel pnlBtns = new JPanel();
+        // Options
+        gbc.gridwidth = 1;
+        gbc.gridy = 1;
+        mainPanel.add(new JLabel("Password Length:"), gbc);
+        spinLength = new JSpinner(new SpinnerNumberModel(16, 8, 128, 1));
+        gbc.gridx = 1;
+        mainPanel.add(spinLength, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2;
+        cbUpper = new JCheckBox("Include Uppercase", true);
+        mainPanel.add(cbUpper, gbc);
+
+        gbc.gridx = 1;
+        cbNumbers = new JCheckBox("Include Numbers", true);
+        mainPanel.add(cbNumbers, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 3;
+        cbSymbols = new JCheckBox("Include Symbols", true);
+        mainPanel.add(cbSymbols, gbc);
+
+        // Buttons
+        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         JButton btnGen = new JButton("Generate");
         btnGen.addActionListener(e -> generate());
         pnlBtns.add(btnGen);
 
-        JButton btnCopy = new JButton("Copy");
+        JButton btnCopy = new JButton("Copy Password");
         btnCopy.addActionListener(e -> {
-            ClipboardManager.copyToClipboard(txtResult.getText());
-            JOptionPane.showMessageDialog(this, "Copied to clipboard! Clears in 30s.");
+            if (!txtResult.getText().isEmpty()) {
+                ClipboardManager.copyToClipboard(txtResult.getText());
+                JOptionPane.showMessageDialog(this, "Copied to clipboard!");
+            }
         });
         pnlBtns.add(btnCopy);
 
-        add(pnlBtns, BorderLayout.SOUTH);
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+        gbc.ipady = 10;
+        gbc.insets = new Insets(20, 10, 10, 10);
+        mainPanel.add(pnlBtns, gbc);
 
-        setSize(500, 300);
+        add(mainPanel, BorderLayout.CENTER);
+
+        pack();
+        setSize(550, 450);
         setLocationRelativeTo(parent);
+        
+        generate(); // Generate an initial password
     }
 
     private void generate() {
         int length = (int) spinLength.getValue();
         StringBuilder pool = new StringBuilder(LOWER);
-        if (cbUpper.isSelected())
-            pool.append(UPPER);
-        if (cbNumbers.isSelected())
-            pool.append(DIGITS);
-        if (cbSymbols.isSelected())
-            pool.append(SYMBOLS);
+        if (cbUpper.isSelected()) pool.append(UPPER);
+        if (cbNumbers.isSelected()) pool.append(DIGITS);
+        if (cbSymbols.isSelected()) pool.append(SYMBOLS);
 
         SecureRandom random = new SecureRandom();
         StringBuilder res = new StringBuilder();
