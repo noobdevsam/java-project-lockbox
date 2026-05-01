@@ -34,7 +34,7 @@ public class VaultDAO {
     // --- CRUD Operations ---
 
     public void insertEntry(VaultEntry entry) throws SQLException {
-        String sql = "INSERT INTO vault(site_name, username, password_blob, iv, secure_notes, encrypted_document_content, password_history_blobs, password_history_ivs) VALUES(?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO vault(site_name, username, password_blob, iv, secure_notes, encrypted_document_content, original_file_name, password_history_blobs, password_history_ivs) VALUES(?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -44,28 +44,26 @@ public class VaultDAO {
             pstmt.setBytes(4, entry.getIv());
             pstmt.setString(5, entry.getSecureNotes());
             pstmt.setBytes(6, entry.getEncryptedDocumentContent());
+            pstmt.setString(7, entry.getOriginalFileName());
 
             // Serialize and set history lists
-            pstmt.setBytes(7, serializeList(entry.getPasswordHistoryBlobs()));
-            pstmt.setBytes(8, serializeList(entry.getPasswordHistoryIvs()));
+            pstmt.setBytes(8, serializeList(entry.getPasswordHistoryBlobs()));
+            pstmt.setBytes(9, serializeList(entry.getPasswordHistoryIvs()));
 
             pstmt.executeUpdate();
         } catch (IOException e) {
-            // Handle serialization error appropriately, maybe log or throw a custom SQL Exception
             throw new SQLException("Error serializing password history for insertion: " + e.getMessage(), e);
         }
     }
 
     public List<VaultEntry> getAllEntries() throws SQLException {
         List<VaultEntry> entries = new ArrayList<>();
-        // Updated SQL to select all new columns
-        String sql = "SELECT id, site_name, username, password_blob, iv, secure_notes, encrypted_document_content, password_history_blobs, password_history_ivs FROM vault";
+        String sql = "SELECT id, site_name, username, password_blob, iv, secure_notes, encrypted_document_content, original_file_name, password_history_blobs, password_history_ivs FROM vault";
         try (Connection conn = DatabaseHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 try {
-                    // Deserialize history lists
                     List<byte[]> historyBlobs = deserializeByteArrayList(rs.getBytes("password_history_blobs"));
                     List<byte[]> historyIvs = deserializeByteArrayList(rs.getBytes("password_history_ivs"));
 
@@ -77,15 +75,12 @@ public class VaultDAO {
                             rs.getBytes("iv"),
                             rs.getString("secure_notes"),
                             rs.getBytes("encrypted_document_content"),
+                            rs.getString("original_file_name"),
                             historyBlobs,
                             historyIvs
                     ));
                 } catch (IOException | ClassNotFoundException e) {
-                    // Handle deserialization error for a specific entry
-                    // Log the error and potentially skip this entry or add a partial one
                     System.err.println("Error deserializing entry ID " + rs.getInt("id") + ": " + e.getMessage());
-                    // Optionally, you could create a VaultEntry with default/empty values for the problematic fields
-                    // For now, we'll just log and proceed, meaning this entry might be incomplete in memory.
                 }
             }
         }
@@ -93,7 +88,7 @@ public class VaultDAO {
     }
 
     public void updateEntry(VaultEntry entry) throws SQLException {
-        String sql = "UPDATE vault SET site_name = ?, username = ?, password_blob = ?, iv = ?, secure_notes = ?, encrypted_document_content = ?, password_history_blobs = ?, password_history_ivs = ? WHERE id = ?";
+        String sql = "UPDATE vault SET site_name = ?, username = ?, password_blob = ?, iv = ?, secure_notes = ?, encrypted_document_content = ?, original_file_name = ?, password_history_blobs = ?, password_history_ivs = ? WHERE id = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -103,12 +98,13 @@ public class VaultDAO {
             pstmt.setBytes(4, entry.getIv());
             pstmt.setString(5, entry.getSecureNotes());
             pstmt.setBytes(6, entry.getEncryptedDocumentContent());
+            pstmt.setString(7, entry.getOriginalFileName());
 
             // Serialize and set history lists
-            pstmt.setBytes(7, serializeList(entry.getPasswordHistoryBlobs()));
-            pstmt.setBytes(8, serializeList(entry.getPasswordHistoryIvs()));
+            pstmt.setBytes(8, serializeList(entry.getPasswordHistoryBlobs()));
+            pstmt.setBytes(9, serializeList(entry.getPasswordHistoryIvs()));
 
-            pstmt.setInt(9, entry.getId()); // ID for WHERE clause
+            pstmt.setInt(10, entry.getId());
             pstmt.executeUpdate();
         } catch (IOException e) {
             throw new SQLException("Error serializing password history for update: " + e.getMessage(), e);

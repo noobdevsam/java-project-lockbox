@@ -31,6 +31,7 @@ public class DatabaseHelper {
                      iv BLOB NOT NULL,
                      secure_notes TEXT,
                      encrypted_document_content BLOB,
+                     original_file_name TEXT,
                      password_history_blobs BLOB,
                      password_history_ivs BLOB
                     );""";

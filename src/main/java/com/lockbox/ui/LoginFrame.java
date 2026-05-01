@@ -80,6 +80,10 @@ public class LoginFrame extends JFrame {
         getRootPane().setDefaultButton(btnLogin);
     }
 
+    public void clearPassword() {
+        txtPassword.setText("");
+    }
+
     private void attemptLogin() {
         char[] password = txtPassword.getPassword();
         if (password.length == 0) {

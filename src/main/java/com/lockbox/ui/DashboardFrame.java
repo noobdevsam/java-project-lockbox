@@ -37,6 +37,7 @@ public class DashboardFrame extends JFrame {
     private JTextField txtDetUser;
     private JPasswordField txtDetPass;
     private JTextArea txtDetNotes;
+    private JLabel lblDetFileName;
     private JButton btnDetDownloadDoc;
     private JButton btnDetHistory;
 
@@ -194,6 +195,11 @@ public class DashboardFrame extends JFrame {
         pnlDetails.add(new JScrollPane(txtDetNotes), gbc);
 
         gbc.gridy = 8;
+        lblDetFileName = new JLabel("Attachment: None");
+        lblDetFileName.setFont(new Font("Segoe UI", Font.ITALIC, 14));
+        pnlDetails.add(lblDetFileName, gbc);
+
+        gbc.gridy = 9;
         pnlDetails.add(new JLabel("Vault Actions"), gbc);
         
         JPanel pnlExt = new JPanel(new GridLayout(1, 2, 15, 0));
@@ -207,10 +213,10 @@ public class DashboardFrame extends JFrame {
         
         pnlExt.add(btnDetDownloadDoc);
         pnlExt.add(btnDetHistory);
-        gbc.gridy = 9;
+        gbc.gridy = 10;
         pnlDetails.add(pnlExt, gbc);
 
-        gbc.gridy = 10; gbc.weighty = 1.0;
+        gbc.gridy = 11; gbc.weighty = 1.0;
         pnlDetails.add(new JLabel(""), gbc); // Spacer
 
         return pnlDetails;
@@ -258,6 +264,7 @@ public class DashboardFrame extends JFrame {
             txtDetNotes.setText(entry.getSecureNotes());
             
             boolean hasDoc = entry.getEncryptedDocumentContent() != null && entry.getEncryptedDocumentContent().length > 0;
+            lblDetFileName.setText(hasDoc ? "Attachment: " + entry.getOriginalFileName() : "Attachment: None");
             btnDetDownloadDoc.setEnabled(hasDoc);
             btnDetDownloadDoc.setText(hasDoc ? "Download Attachment (" + (entry.getEncryptedDocumentContent().length / 1024) + " KB)" : "No Attachment");
             
@@ -268,6 +275,7 @@ public class DashboardFrame extends JFrame {
         pnlDetails.revalidate();
         pnlDetails.repaint();
     }
+
 
     private void filterTable() {
         String query = txtSearch.getText().toLowerCase();
@@ -317,7 +325,8 @@ public class DashboardFrame extends JFrame {
         txtNotes.setWrapStyleWord(true);
         
         final byte[][] attachmentData = { entryToEdit != null ? entryToEdit.getEncryptedDocumentContent() : new byte[0] };
-        JLabel lblAttach = new JLabel(attachmentData[0].length > 0 ? "Attached: " + (attachmentData[0].length/1024) + " KB" : "No file attached");
+        final String[] attachmentName = { entryToEdit != null ? entryToEdit.getOriginalFileName() : "" };
+        JLabel lblAttach = new JLabel((attachmentName[0] != null && !attachmentName[0].isEmpty()) ? "Attached: " + attachmentName[0] + " (" + (attachmentData[0].length/1024) + " KB)" : "No file attached");
 
         gbc.gridx = 0; gbc.gridy = 0; dialog.add(new JLabel("Service Name:"), gbc);
         gbc.gridx = 1; dialog.add(txtSite, gbc);
@@ -342,13 +351,15 @@ public class DashboardFrame extends JFrame {
                     System.arraycopy(iv, 0, payload, 0, iv.length);
                     System.arraycopy(encrypted, 0, payload, iv.length, encrypted.length);
                     attachmentData[0] = payload;
-                    lblAttach.setText("Attached: " + fc.getSelectedFile().getName() + " (" + (payload.length/1024) + " KB)");
+                    attachmentName[0] = fc.getSelectedFile().getName();
+                    lblAttach.setText("Attached: " + attachmentName[0] + " (" + (payload.length/1024) + " KB)");
                 } catch (Exception ex) { JOptionPane.showMessageDialog(dialog, "Error attaching file: " + ex.getMessage()); }
             }
         });
         JButton btnClearDoc = new JButton("Clear");
         btnClearDoc.addActionListener(e -> {
             attachmentData[0] = new byte[0];
+            attachmentName[0] = "";
             lblAttach.setText("No file attached");
         });
         pnlDoc.add(btnAttach);
@@ -383,7 +394,7 @@ public class DashboardFrame extends JFrame {
                 String b64User = java.util.Base64.getEncoder().encodeToString(userPayload);
 
                 if (entryToEdit == null) {
-                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, passIv, txtNotes.getText(), attachmentData[0], new ArrayList<>(), new ArrayList<>()));
+                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, passIv, txtNotes.getText(), attachmentData[0], attachmentName[0], new ArrayList<>(), new ArrayList<>()));
                 } else {
                     entryToEdit.setSiteName(txtSite.getText());
                     entryToEdit.setUsername(b64User);
@@ -397,6 +408,7 @@ public class DashboardFrame extends JFrame {
                     
                     entryToEdit.setSecureNotes(txtNotes.getText());
                     entryToEdit.setEncryptedDocumentContent(attachmentData[0]);
+                    entryToEdit.setOriginalFileName(attachmentName[0]);
                     vaultDAO.updateEntry(entryToEdit);
                 }
                 dialog.dispose();
@@ -526,6 +538,9 @@ public class DashboardFrame extends JFrame {
     private void logout() {
         Arrays.fill(masterKey, (byte) 0);
         ClipboardManager.clearClipboard();
+        if (parentLogin instanceof LoginFrame) {
+            ((LoginFrame) parentLogin).clearPassword();
+        }
         this.dispose();
         parentLogin.setVisible(true);
     }
