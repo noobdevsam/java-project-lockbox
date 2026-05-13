@@ -1,0 +1,9 @@
+{
+  "name": "com.lockbox.bridge",
+  "description": "LockBox Native Messaging Host",
+  "path": "/path/to/run_lockbox_bridge.sh",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://your-extension-id-here/"
+  ]
+}
