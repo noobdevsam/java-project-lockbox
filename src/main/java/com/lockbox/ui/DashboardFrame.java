@@ -45,6 +45,7 @@ public class DashboardFrame extends JFrame {
         super("LockBox - Secure Vault v2.0");
         this.parentLogin = parentLogin;
         this.masterKey = masterKey;
+        AuthManager.getInstance().setMasterKey(masterKey);
         this.vaultDAO = new VaultDAO();
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -536,6 +537,7 @@ public class DashboardFrame extends JFrame {
     }
 
     private void logout() {
+        AuthManager.getInstance().logout();
         Arrays.fill(masterKey, (byte) 0);
         ClipboardManager.clearClipboard();
         if (parentLogin instanceof LoginFrame) {
