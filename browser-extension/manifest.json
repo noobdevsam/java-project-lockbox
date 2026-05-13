@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "LockBox Extension",
+  "version": "1.0",
+  "description": "Interact with the LockBox desktop application.",
+  "permissions": ["nativeMessaging"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
