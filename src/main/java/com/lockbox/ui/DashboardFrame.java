@@ -1,25 +1,23 @@
 package com.lockbox.ui;
 
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.lockbox.bridge.AuthManager;
+import com.lockbox.db.VaultDAO;
+import com.lockbox.db.VaultEntry;
+import com.lockbox.security.CryptoUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-
-import com.lockbox.db.VaultDAO;
-import com.lockbox.db.VaultEntry;
-import com.lockbox.security.CryptoUtil;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class DashboardFrame extends JFrame {
     private final JFrame parentLogin;
