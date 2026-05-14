@@ -1,3 +1,3 @@
 #!/bin/sh
 # Wrapper script to run the LockBox Native Host
-exec java -cp /path/to/LockBox.jar com.lockbox.bridge.NativeHost
+exec java -jar target/lockbox-1.0-SNAPSHOT.jar

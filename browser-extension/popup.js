@@ -1,12 +1,29 @@
+let port = null;
+
+function connect() {
+  if (!port) {
+    port = chrome.runtime.connectNative('com.lockbox.bridge');
+    port.onMessage.addListener((response) => {
+      const resDiv = document.getElementById('result');
+      if (response.status === 'success') {
+        resDiv.innerHTML = `<strong>User:</strong> ${response.username}<br><strong>Blob:</strong> <small style="color:gray">${response.password_blob.substring(0, 30)}...</small>`;
+      } else {
+        resDiv.innerText = "Error: " + response.message;
+      }
+    });
+    port.onDisconnect.addListener(() => {
+      port = null;
+      document.getElementById('result').innerText = "Disconnected.";
+    });
+  }
+}
+
 document.getElementById('get').addEventListener('click', () => {
   const site = document.getElementById('site').value;
-  const message = { action: 'GET_ENTRY', site: site };
+  if (!site) return;
 
-  chrome.runtime.sendNativeMessage('com.lockbox.bridge', message, (response) => {
-    if (chrome.runtime.lastError) {
-      document.getElementById('result').innerText = "Error: " + chrome.runtime.lastError.message;
-    } else if (response) {
-      document.getElementById('result').innerText = JSON.stringify(response);
-    }
-  });
+  document.getElementById('result').innerText = "Fetching...";
+  connect();
+  port.postMessage({action: 'GET_ENTRY', site: site});
 });
+

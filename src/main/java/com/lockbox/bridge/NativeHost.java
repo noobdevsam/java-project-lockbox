@@ -1,11 +1,16 @@
 package com.lockbox.bridge;
 
-import java.io.*;
-import java.nio.*;
 import com.lockbox.db.VaultDAO;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
 public class NativeHost {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         MessageDispatcher dispatcher = new MessageDispatcher(new VaultDAO());
         
         try (InputStream in = System.in;
@@ -13,19 +18,30 @@ public class NativeHost {
             
             while (true) {
                 byte[] lenBytes = new byte[4];
-                if (in.read(lenBytes) != 4) break;
-                
-                int len = ByteBuffer.wrap(lenBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
-                byte[] msgBytes = new byte[len];
-                
-                int read = 0;
-                while (read < len) {
-                    read += in.read(msgBytes, read, len - read);
+                int read = in.read(lenBytes);
+                if (read == -1) {
+                    System.err.println("NativeHost: Input stream closed. Exiting.");
+                    break;
+                }
+                if (read != 4) {
+                    System.err.println("NativeHost: Read " + read + " bytes, expected 4.");
+                    continue;
                 }
                 
-                String request = new String(msgBytes, "UTF-8");
+                int len = ByteBuffer.wrap(lenBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+                System.err.println("NativeHost: Received message length: " + len);
+                
+                byte[] msgBytes = new byte[len];
+                int totalRead = 0;
+                while (totalRead < len) {
+                    int r = in.read(msgBytes, totalRead, len - totalRead);
+                    if (r == -1) break;
+                    totalRead += r;
+                }
+                
+                String request = new String(msgBytes, StandardCharsets.UTF_8);
                 String response = dispatcher.handle(request);
-                byte[] respBytes = response.getBytes("UTF-8");
+                byte[] respBytes = response.getBytes(StandardCharsets.UTF_8);
                 
                 byte[] respLen = ByteBuffer.allocate(4)
                                            .order(ByteOrder.LITTLE_ENDIAN)
