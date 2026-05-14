@@ -33,6 +33,7 @@ public class PasswordGeneratorDialog extends JDialog {
         txtResult.setHorizontalAlignment(SwingConstants.CENTER);
         txtResult.setFont(new Font("Monospaced", Font.BOLD, 18));
         txtResult.setPreferredSize(new Dimension(0, 50));
+        txtResult.putClientProperty("JTextField.placeholderText", "Generated password");
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         mainPanel.add(txtResult, gbc);
 

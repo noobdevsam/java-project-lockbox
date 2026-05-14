@@ -159,6 +159,7 @@ public class DashboardFrame extends JFrame {
         txtDetUser = new JTextField();
         txtDetUser.setEditable(false);
         txtDetUser.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        txtDetUser.putClientProperty("JTextField.placeholderText", "Username");
         gbc.gridy = 2;
         pnlDetails.add(txtDetUser, gbc);
 
@@ -167,6 +168,7 @@ public class DashboardFrame extends JFrame {
         txtDetPass = new JPasswordField();
         txtDetPass.setEditable(false);
         txtDetPass.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        txtDetPass.putClientProperty("JTextField.placeholderText", "Password");
         gbc.gridy = 4;
         pnlDetails.add(txtDetPass, gbc);
 
@@ -190,6 +192,7 @@ public class DashboardFrame extends JFrame {
         txtDetNotes.setLineWrap(true);
         txtDetNotes.setWrapStyleWord(true);
         txtDetNotes.setBackground(UIManager.getColor("Table.background"));
+        txtDetNotes.putClientProperty("JTextField.placeholderText", "Enter notes here...");
         gbc.gridy = 7;
         pnlDetails.add(new JScrollPane(txtDetNotes), gbc);
 
@@ -317,11 +320,15 @@ public class DashboardFrame extends JFrame {
         gbc.insets = new Insets(12, 20, 12, 20);
 
         JTextField txtSite = new JTextField(30);
+        txtSite.putClientProperty("JTextField.placeholderText", "e.g., Google, GitHub");
         JTextField txtUser = new JTextField(30);
+        txtUser.putClientProperty("JTextField.placeholderText", "username or email");
         JPasswordField txtPass = new JPasswordField(30);
+        txtPass.putClientProperty("JTextField.placeholderText", "enter password");
         JTextArea txtNotes = new JTextArea(5, 30);
         txtNotes.setLineWrap(true);
         txtNotes.setWrapStyleWord(true);
+        txtNotes.putClientProperty("JTextField.placeholderText", "optional notes...");
         
         final byte[][] attachmentData = { entryToEdit != null ? entryToEdit.getEncryptedDocumentContent() : new byte[0] };
         final String[] attachmentName = { entryToEdit != null ? entryToEdit.getOriginalFileName() : "" };

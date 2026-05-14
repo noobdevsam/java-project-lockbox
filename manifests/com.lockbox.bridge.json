@@ -1,9 +1,9 @@
 {
   "name": "com.lockbox.bridge",
   "description": "LockBox Native Messaging Host",
-  "path": "/path/to/run_lockbox_bridge.sh",
+  "path": "/home/sam/MyProjects/JavaProjects/java-project-lockbox/bridge_wrapper.sh",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://your-extension-id-here/"
+    "chrome-extension://kmjlhmlbhkpecknhoaifgkockimfaabc/"
   ]
 }
