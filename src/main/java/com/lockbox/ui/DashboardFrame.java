@@ -426,6 +426,9 @@ public class DashboardFrame extends JFrame {
             try { 
                 txtPass.setText(new String(CryptoUtil.decrypt(entryToEdit.getPasswordBlob(), masterKey, entryToEdit.getIv()), StandardCharsets.UTF_8)); 
             } catch (Exception ignored) {}
+            try {
+                attachmentNameBytes[0] = CryptoUtil.decrypt(entryToEdit.getOriginalFileName(), masterKey, entryToEdit.getOriginalFileNameIv());
+            } catch (Exception ignored) {}
         }
 
         JButton btnSave = new JButton("Save Vault Entry");
