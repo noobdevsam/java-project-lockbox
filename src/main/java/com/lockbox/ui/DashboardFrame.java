@@ -1,14 +1,15 @@
 package com.lockbox.ui;
 
-import com.lockbox.bridge.AuthManager;
-import com.lockbox.db.VaultDAO;
-import com.lockbox.db.VaultEntry;
-import com.lockbox.security.CryptoUtil;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileOutputStream;
@@ -18,6 +19,29 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+
+import com.lockbox.bridge.AuthManager;
+import com.lockbox.db.VaultDAO;
+import com.lockbox.db.VaultEntry;
+import com.lockbox.security.CryptoUtil;
 
 public class DashboardFrame extends JFrame {
     private final JFrame parentLogin;
@@ -109,6 +133,7 @@ public class DashboardFrame extends JFrame {
         txtSearch.putClientProperty("JTextField.placeholderText", "Search service or username...");
         txtSearch.putClientProperty("JTextField.showClearButton", true);
         txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 filterTable();
             }
@@ -149,7 +174,7 @@ public class DashboardFrame extends JFrame {
         gbc.insets = new Insets(8, 0, 8, 0);
         gbc.weightx = 1.0;
 
-        lblDetTitle = new JLabel("Service Name");
+        lblDetTitle = new JLabel("Website/App Name");
         lblDetTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         pnlDetails.add(lblDetTitle, gbc);
