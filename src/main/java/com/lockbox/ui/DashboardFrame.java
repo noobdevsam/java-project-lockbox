@@ -364,7 +364,9 @@ public class DashboardFrame extends JFrame {
         txtNotes.putClientProperty("JTextField.placeholderText", "optional notes...");
         
         final byte[][] attachmentData = { entryToEdit != null ? entryToEdit.getEncryptedDocumentContent() : new byte[0] };
-        final byte[][] attachmentNameBytes = { entryToEdit != null ? entryToEdit.getOriginalFileName() : new byte[0] };
+        final byte[][] attachmentNameEncrypted = { entryToEdit != null ? entryToEdit.getOriginalFileName() : new byte[0] };
+        final byte[][] attachmentNameIv = { entryToEdit != null ? entryToEdit.getOriginalFileNameIv() : new byte[0] };
+
         String attachmentName = "";
         if (entryToEdit != null && entryToEdit.getOriginalFileName() != null && entryToEdit.getOriginalFileName().length > 0) {
             try {
@@ -396,13 +398,10 @@ public class DashboardFrame extends JFrame {
                     System.arraycopy(iv, 0, payload, 0, iv.length);
                     System.arraycopy(encrypted, 0, payload, iv.length, encrypted.length);
                     attachmentData[0] = payload;
-                    attachmentNameBytes[0] = fc.getSelectedFile().getName().getBytes(StandardCharsets.UTF_8);
-                    byte[] nameIv = CryptoUtil.generateIV();
-                    byte[] encryptedName = CryptoUtil.encrypt(attachmentNameBytes[0], masterKey, nameIv);
-                    byte[] payloadName = new byte[nameIv.length + encryptedName.length];
-                    System.arraycopy(nameIv, 0, payloadName, 0, nameIv.length);
-                    System.arraycopy(encryptedName, 0, payloadName, nameIv.length, encryptedName.length);
-                    attachmentNameBytes[0] = payloadName;
+
+                    byte[] nameRaw = fc.getSelectedFile().getName().getBytes(StandardCharsets.UTF_8);
+                    attachmentNameIv[0] = CryptoUtil.generateIV();
+                    attachmentNameEncrypted[0] = CryptoUtil.encrypt(nameRaw, masterKey, attachmentNameIv[0]);
                     
                     lblAttach.setText("Attached: " + fc.getSelectedFile().getName() + " (" + (payload.length/1024) + " KB)");
                 } catch (Exception ex) { JOptionPane.showMessageDialog(dialog, "Error attaching file: " + ex.getMessage()); }
@@ -411,7 +410,8 @@ public class DashboardFrame extends JFrame {
         JButton btnClearDoc = new JButton("Clear");
         btnClearDoc.addActionListener(e -> {
             attachmentData[0] = new byte[0];
-            attachmentNameBytes[0] = new byte[0];
+            attachmentNameEncrypted[0] = new byte[0];
+            attachmentNameIv[0] = new byte[0];
             lblAttach.setText("No file attached");
         });
         pnlDoc.add(btnAttach);
@@ -427,7 +427,8 @@ public class DashboardFrame extends JFrame {
                 txtPass.setText(new String(CryptoUtil.decrypt(entryToEdit.getPasswordBlob(), masterKey, entryToEdit.getIv()), StandardCharsets.UTF_8)); 
             } catch (Exception ignored) {}
             try {
-                attachmentNameBytes[0] = CryptoUtil.decrypt(entryToEdit.getOriginalFileName(), masterKey, entryToEdit.getOriginalFileNameIv());
+                attachmentNameEncrypted[0] = entryToEdit.getOriginalFileName();
+                attachmentNameIv[0] = entryToEdit.getOriginalFileNameIv();
             } catch (Exception ignored) {}
         }
 
@@ -451,9 +452,7 @@ public class DashboardFrame extends JFrame {
                 if (entryToEdit == null) {
                     byte[] notesIv = CryptoUtil.generateIV();
                     byte[] encNotes = CryptoUtil.encrypt(txtNotes.getText().getBytes(StandardCharsets.UTF_8), masterKey, notesIv);
-                    byte[] nameIv = CryptoUtil.generateIV();
-                    byte[] encName = CryptoUtil.encrypt(attachmentNameBytes[0], masterKey, nameIv);
-                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, passIv, encNotes, notesIv, attachmentData[0], encName, nameIv, new ArrayList<>(), new ArrayList<>()));
+                    vaultDAO.insertEntry(new VaultEntry(0, txtSite.getText(), b64User, encPass, passIv, encNotes, notesIv, attachmentData[0], attachmentNameEncrypted[0], attachmentNameIv[0], new ArrayList<>(), new ArrayList<>()));
                 } else {
                     entryToEdit.setSiteName(txtSite.getText());
                     entryToEdit.setUsername(b64User);
@@ -467,14 +466,12 @@ public class DashboardFrame extends JFrame {
                     
                     byte[] notesIv = CryptoUtil.generateIV();
                     byte[] encNotes = CryptoUtil.encrypt(txtNotes.getText().getBytes(StandardCharsets.UTF_8), masterKey, notesIv);
-                    byte[] nameIv = CryptoUtil.generateIV();
-                    byte[] encName = CryptoUtil.encrypt(attachmentNameBytes[0], masterKey, nameIv);
                     
                     entryToEdit.setSecureNotes(encNotes);
                     entryToEdit.setSecureNotesIv(notesIv);
                     entryToEdit.setEncryptedDocumentContent(attachmentData[0]);
-                    entryToEdit.setOriginalFileName(encName);
-                    entryToEdit.setOriginalFileNameIv(nameIv);
+                    entryToEdit.setOriginalFileName(attachmentNameEncrypted[0]);
+                    entryToEdit.setOriginalFileNameIv(attachmentNameIv[0]);
                     vaultDAO.updateEntry(entryToEdit);
                 }
                 dialog.dispose();
