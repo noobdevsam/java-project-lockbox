@@ -294,7 +294,7 @@ public class DashboardFrame extends JFrame {
             
             boolean hasDoc = entry.getEncryptedDocumentContent() != null && entry.getEncryptedDocumentContent().length > 0;
             String fileName = "";
-            if (entry.getOriginalFileName() != null && entry.getOriginalFileName().length > 0) {
+            if (entry.getOriginalFileName() != null && entry.getOriginalFileName().length > 0 && entry.getOriginalFileNameIv() != null && entry.getOriginalFileNameIv().length > 0) {
                 try {
                     fileName = new String(CryptoUtil.decrypt(entry.getOriginalFileName(), masterKey, entry.getOriginalFileNameIv()), StandardCharsets.UTF_8);
                 } catch (Exception e) { fileName = "Error"; }
@@ -368,7 +368,7 @@ public class DashboardFrame extends JFrame {
         final byte[][] attachmentNameIv = { entryToEdit != null ? entryToEdit.getOriginalFileNameIv() : new byte[0] };
 
         String attachmentName = "";
-        if (entryToEdit != null && entryToEdit.getOriginalFileName() != null && entryToEdit.getOriginalFileName().length > 0) {
+        if (entryToEdit != null && entryToEdit.getOriginalFileName() != null && entryToEdit.getOriginalFileName().length > 0 && entryToEdit.getOriginalFileNameIv() != null && entryToEdit.getOriginalFileNameIv().length > 0) {
             try {
                 attachmentName = new String(CryptoUtil.decrypt(entryToEdit.getOriginalFileName(), masterKey, entryToEdit.getOriginalFileNameIv()), StandardCharsets.UTF_8);
             } catch (Exception e) { attachmentName = "Error"; }
