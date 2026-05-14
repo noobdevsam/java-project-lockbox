@@ -269,9 +269,11 @@ public class DashboardFrame extends JFrame {
             
             boolean hasDoc = entry.getEncryptedDocumentContent() != null && entry.getEncryptedDocumentContent().length > 0;
             String fileName = "";
-            try {
-                fileName = new String(CryptoUtil.decrypt(entry.getOriginalFileName(), masterKey, entry.getOriginalFileNameIv()), StandardCharsets.UTF_8);
-            } catch (Exception e) { fileName = "Error"; }
+            if (entry.getOriginalFileName() != null && entry.getOriginalFileName().length > 0) {
+                try {
+                    fileName = new String(CryptoUtil.decrypt(entry.getOriginalFileName(), masterKey, entry.getOriginalFileNameIv()), StandardCharsets.UTF_8);
+                } catch (Exception e) { fileName = "Error"; }
+            }
             lblDetFileName.setText(hasDoc ? "Attachment: " + fileName : "Attachment: None");
             btnDetDownloadDoc.setEnabled(hasDoc);
             btnDetDownloadDoc.setText(hasDoc ? "Download Attachment (" + (entry.getEncryptedDocumentContent().length / 1024) + " KB)" : "No Attachment");
