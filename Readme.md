@@ -43,3 +43,50 @@
    2 echo '{"action":"GET_ENTRY", "site":"example.com"}' | ./run_lockbox_bridge.sh
   Note: This command will fail with a "Vault is locked" message if the desktop application is not currently running
   and logged in.
+
+Running Chromium inside a Flatpak sandbox requires specific adjustments because the browser is isolated from your host
+filesystem.
+
+To make the Native Messaging bridge work with your Flatpak Chromium, follow these steps:
+
+1. Create a Sandbox-Escape Wrapper
+   The browser cannot directly execute your run_lockbox_bridge.sh script because of the sandbox. You need a wrapper that
+   uses flatpak-spawn --host to run the bridge on your
+   system.
+
+Create a new file called bridge_wrapper.sh:
+
+1 #!/bin/sh
+2 # Use flatpak-spawn to run the bridge on your host system
+3 flatpak-spawn --host /java-project-lockbox/run_lockbox_bridge.sh
+Make it executable: chmod +x bridge_wrapper.sh
+
+2. Update the Manifest
+   Point the path in your manifests/com.lockbox.bridge.json file to this new wrapper script:
+
+1 {
+2   "name": "com.lockbox.bridge",
+3   "description": "LockBox Native Messaging Host",
+4   "path": "java-project-lockbox/bridge_wrapper.sh",
+5   "type": "stdio",
+6   "allowed_origins": ["chrome-extension://<YOUR_EXTENSION_ID>/"]
+7 }
+
+3. Place the Manifest in the Flatpak Directory
+   Flatpak browsers look for manifests in a sandbox-specific location. Create the directory and copy your manifest
+   there:
+
+1 mkdir -p ~/.var/app/org.chromium.Chromium/config/chromium/NativeMessagingHosts/
+2 cp manifests/com.lockbox.bridge.json ~
+/.var/app/org.chromium.Chromium/config/chromium/NativeMessagingHosts/com.lockbox.bridge.json
+
+4. Grant Permissions to Flatpak
+   The Chromium Flatpak needs permission to communicate with the system's Flatpak host (to run flatpak-spawn). Run this
+   command in your terminal:
+
+1 flatpak override org.chromium.Chromium --talk-name=org.freedesktop.Flatpak
+
+Verification
+Once these steps are completed, restart your Chromium browser. The extension should now be able to communicate with the
+host by talking through the flatpak-spawn bridge,
+bypassing the sandbox safely to reach your Java application.
