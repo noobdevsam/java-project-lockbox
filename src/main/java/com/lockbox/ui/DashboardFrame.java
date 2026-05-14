@@ -355,9 +355,9 @@ public class DashboardFrame extends JFrame {
         JTextField txtSite = new JTextField(30);
         txtSite.putClientProperty("JTextField.placeholderText", "e.g., Google, GitHub");
         JTextField txtUser = new JTextField(30);
-        txtUser.putClientProperty("JTextField.placeholderText", "username or email");
+        txtUser.putClientProperty("JTextField.placeholderText", "Enter username or email");
         JPasswordField txtPass = new JPasswordField(30);
-        txtPass.putClientProperty("JTextField.placeholderText", "enter password");
+        txtPass.putClientProperty("JTextField.placeholderText", "Enter password");
         JTextArea txtNotes = new JTextArea(5, 30);
         txtNotes.setLineWrap(true);
         txtNotes.setWrapStyleWord(true);
@@ -375,7 +375,7 @@ public class DashboardFrame extends JFrame {
         }
         JLabel lblAttach = new JLabel((!attachmentName.isEmpty()) ? "Attached: " + attachmentName + " (" + (attachmentData[0].length/1024) + " KB)" : "No file attached");
 
-        gbc.gridx = 0; gbc.gridy = 0; dialog.add(new JLabel("Service Name:"), gbc);
+        gbc.gridx = 0; gbc.gridy = 0; dialog.add(new JLabel("Website/App Name:"), gbc);
         gbc.gridx = 1; dialog.add(txtSite, gbc);
         gbc.gridx = 0; gbc.gridy = 1; dialog.add(new JLabel("Username:"), gbc);
         gbc.gridx = 1; dialog.add(txtUser, gbc);

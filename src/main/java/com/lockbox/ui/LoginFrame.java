@@ -1,12 +1,28 @@
 package com.lockbox.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.sql.SQLException;
+import java.util.Arrays;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+import javax.swing.border.EmptyBorder;
+
 import com.lockbox.db.VaultDAO;
 import com.lockbox.security.KeyDerivation;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.util.Arrays;
 
 public class LoginFrame extends JFrame {
     private final JPasswordField txtPassword;
@@ -116,7 +132,7 @@ public class LoginFrame extends JFrame {
                     handleFailedAttempt();
                 }
             }
-        } catch (Exception ex) {
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | SQLException ex) {
             lblStatus.setText("Error: " + ex.getMessage());
             ex.printStackTrace();
         }

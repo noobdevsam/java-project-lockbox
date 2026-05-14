@@ -1,14 +1,17 @@
 package com.lockbox;
 
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.lockbox.db.DatabaseHelper;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -51,7 +54,7 @@ public class Main {
             // Setup the theme
             UIManager.setLookAndFeel(new FlatDarkLaf());
 
-        } catch (Exception ex) {
+        } catch (NumberFormatException | UnsupportedLookAndFeelException ex) {
             System.err.println("Failed to initialize LaF with advanced styling");
             ex.printStackTrace();
         }
