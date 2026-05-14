@@ -582,7 +582,7 @@ public class DashboardFrame extends JFrame {
                 try {
                     vaultDAO.deleteEntry(entry.getId());
                     refreshTable();
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Delete failed: " + ex.getMessage()); }
+                } catch (SQLException ex) { JOptionPane.showMessageDialog(this, "Delete failed: " + ex.getMessage()); }
             }
         }
     }
@@ -602,8 +602,8 @@ public class DashboardFrame extends JFrame {
         AuthManager.getInstance().logout();
         Arrays.fill(masterKey, (byte) 0);
         ClipboardManager.clearClipboard();
-        if (parentLogin instanceof LoginFrame) {
-            ((LoginFrame) parentLogin).clearPassword();
+        if (parentLogin instanceof LoginFrame loginFrame) {
+            loginFrame.clearPassword();
         }
         this.dispose();
         parentLogin.setVisible(true);
