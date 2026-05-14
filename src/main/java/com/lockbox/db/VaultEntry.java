@@ -20,9 +20,12 @@ public class VaultEntry implements Serializable {
     private byte[] iv; // Current password IV
 
     // New fields for enhanced features
-    private String secureNotes;
+    private byte[] secureNotes; // Updated to byte[]
+    private byte[] secureNotesIv; // New field
     private byte[] encryptedDocumentContent;
-    private String originalFileName; // New field
+    private byte[] originalFileName; // Updated to byte[]
+    private byte[] originalFileNameIv; // New field
+    
     private List<byte[]> passwordHistoryBlobs = new ArrayList<>(); // List of previous password blobs
     private List<byte[]> passwordHistoryIvs = new ArrayList<>(); // List of IVs corresponding to the password history blobs
 
@@ -33,23 +36,27 @@ public class VaultEntry implements Serializable {
         this.username = username;
         this.passwordBlob = passwordBlob;
         this.iv = iv;
-        this.secureNotes = ""; // Default to empty
+        this.secureNotes = new byte[0]; // Default to empty
+        this.secureNotesIv = new byte[0]; // Default to empty
         this.encryptedDocumentContent = new byte[0]; // Default to empty
-        this.originalFileName = ""; // Default to empty
+        this.originalFileName = new byte[0]; // Default to empty
+        this.originalFileNameIv = new byte[0]; // Default to empty
         this.passwordHistoryBlobs = new ArrayList<>(); // Initialize empty list
         this.passwordHistoryIvs = new ArrayList<>(); // Initialize empty list
     }
 
     // Constructor for new entries or when loading from DB with all fields
-    public VaultEntry(int id, String siteName, String username, byte[] passwordBlob, byte[] iv, String secureNotes, byte[] encryptedDocumentContent, String originalFileName, List<byte[]> passwordHistoryBlobs, List<byte[]> passwordHistoryIvs) {
+    public VaultEntry(int id, String siteName, String username, byte[] passwordBlob, byte[] iv, byte[] secureNotes, byte[] secureNotesIv, byte[] encryptedDocumentContent, byte[] originalFileName, byte[] originalFileNameIv, List<byte[]> passwordHistoryBlobs, List<byte[]> passwordHistoryIvs) {
         this.id = id;
         this.siteName = siteName;
         this.username = username;
         this.passwordBlob = passwordBlob;
         this.iv = iv;
-        this.secureNotes = secureNotes != null ? secureNotes : "";
+        this.secureNotes = secureNotes != null ? secureNotes : new byte[0];
+        this.secureNotesIv = secureNotesIv != null ? secureNotesIv : new byte[0];
         this.encryptedDocumentContent = encryptedDocumentContent != null ? encryptedDocumentContent : new byte[0];
-        this.originalFileName = originalFileName != null ? originalFileName : "";
+        this.originalFileName = originalFileName != null ? originalFileName : new byte[0];
+        this.originalFileNameIv = originalFileNameIv != null ? originalFileNameIv : new byte[0];
         this.passwordHistoryBlobs = (passwordHistoryBlobs != null) ? new ArrayList<>(passwordHistoryBlobs) : new ArrayList<>();
         this.passwordHistoryIvs = (passwordHistoryIvs != null) ? new ArrayList<>(passwordHistoryIvs) : new ArrayList<>();
     }
@@ -60,9 +67,11 @@ public class VaultEntry implements Serializable {
     public String getUsername() { return username; }
     public byte[] getPasswordBlob() { return passwordBlob; }
     public byte[] getIv() { return iv; }
-    public String getSecureNotes() { return secureNotes; }
+    public byte[] getSecureNotes() { return secureNotes; }
+    public byte[] getSecureNotesIv() { return secureNotesIv; }
     public byte[] getEncryptedDocumentContent() { return encryptedDocumentContent; }
-    public String getOriginalFileName() { return originalFileName; }
+    public byte[] getOriginalFileName() { return originalFileName; }
+    public byte[] getOriginalFileNameIv() { return originalFileNameIv; }
     public List<byte[]> getPasswordHistoryBlobs() { return Collections.unmodifiableList(passwordHistoryBlobs); }
     public List<byte[]> getPasswordHistoryIvs() { return Collections.unmodifiableList(passwordHistoryIvs); }
 
@@ -70,7 +79,9 @@ public class VaultEntry implements Serializable {
     public void setId(int id) { this.id = id; }
     public void setSiteName(String siteName) { this.siteName = siteName; }
     public void setUsername(String username) { this.username = username; }
-    public void setOriginalFileName(String originalFileName) { this.originalFileName = (originalFileName != null) ? originalFileName : ""; }
+    
+    public void setOriginalFileName(byte[] originalFileName) { this.originalFileName = (originalFileName != null) ? originalFileName : new byte[0]; }
+    public void setOriginalFileNameIv(byte[] originalFileNameIv) { this.originalFileNameIv = (originalFileNameIv != null) ? originalFileNameIv : new byte[0]; }
     
     /**
      * Sets the current password and adds the previous current password to history.
@@ -87,7 +98,8 @@ public class VaultEntry implements Serializable {
         this.iv = newIv;
     }
 
-    public void setSecureNotes(String secureNotes) { this.secureNotes = (secureNotes != null) ? secureNotes : ""; }
+    public void setSecureNotes(byte[] secureNotes) { this.secureNotes = (secureNotes != null) ? secureNotes : new byte[0]; }
+    public void setSecureNotesIv(byte[] secureNotesIv) { this.secureNotesIv = (secureNotesIv != null) ? secureNotesIv : new byte[0]; }
     public void setEncryptedDocumentContent(byte[] encryptedDocumentContent) { this.encryptedDocumentContent = (encryptedDocumentContent != null) ? encryptedDocumentContent : new byte[0]; }
 
     // --- Password History Management ---

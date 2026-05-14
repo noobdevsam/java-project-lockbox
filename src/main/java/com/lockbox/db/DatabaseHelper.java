@@ -29,9 +29,11 @@ public class DatabaseHelper {
                      username TEXT NOT NULL,
                      password_blob BLOB NOT NULL,
                      iv BLOB NOT NULL,
-                     secure_notes TEXT,
+                     secure_notes BLOB,
+                     secure_notes_iv BLOB,
                      encrypted_document_content BLOB,
-                     original_file_name TEXT,
+                     original_file_name BLOB,
+                     original_file_name_iv BLOB,
                      password_history_blobs BLOB,
                      password_history_ivs BLOB
                     );""";

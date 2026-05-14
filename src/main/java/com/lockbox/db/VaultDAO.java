@@ -12,16 +12,7 @@ import java.util.List;
 
 public class VaultDAO {
 
-    // --- Database Schema Modification ---
-    // The SQL statements in DatabaseHelper.java have been updated to include:
-    // secure_notes TEXT,
-    // encrypted_document_content BLOB,
-    // password_history_blobs BLOB,
-    // password_history_ivs BLOB
-
     // --- Data Serialization/Deserialization Helpers ---
-    // Using VaultEntry's static methods for serialization/deserialization of lists
-
     private byte[] serializeList(List<? extends Serializable> list) throws IOException {
         return VaultEntry.serializeList(list);
     }
@@ -30,11 +21,10 @@ public class VaultDAO {
         return VaultEntry.deserializeByteArrayList(data);
     }
 
-
     // --- CRUD Operations ---
 
     public void insertEntry(VaultEntry entry) throws SQLException {
-        String sql = "INSERT INTO vault(site_name, username, password_blob, iv, secure_notes, encrypted_document_content, original_file_name, password_history_blobs, password_history_ivs) VALUES(?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO vault(site_name, username, password_blob, iv, secure_notes, secure_notes_iv, encrypted_document_content, original_file_name, original_file_name_iv, password_history_blobs, password_history_ivs) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -42,13 +32,15 @@ public class VaultDAO {
             pstmt.setString(2, entry.getUsername());
             pstmt.setBytes(3, entry.getPasswordBlob());
             pstmt.setBytes(4, entry.getIv());
-            pstmt.setString(5, entry.getSecureNotes());
-            pstmt.setBytes(6, entry.getEncryptedDocumentContent());
-            pstmt.setString(7, entry.getOriginalFileName());
+            pstmt.setBytes(5, entry.getSecureNotes());
+            pstmt.setBytes(6, entry.getSecureNotesIv());
+            pstmt.setBytes(7, entry.getEncryptedDocumentContent());
+            pstmt.setBytes(8, entry.getOriginalFileName());
+            pstmt.setBytes(9, entry.getOriginalFileNameIv());
 
             // Serialize and set history lists
-            pstmt.setBytes(8, serializeList(entry.getPasswordHistoryBlobs()));
-            pstmt.setBytes(9, serializeList(entry.getPasswordHistoryIvs()));
+            pstmt.setBytes(10, serializeList(entry.getPasswordHistoryBlobs()));
+            pstmt.setBytes(11, serializeList(entry.getPasswordHistoryIvs()));
 
             pstmt.executeUpdate();
         } catch (IOException e) {
@@ -58,7 +50,7 @@ public class VaultDAO {
 
     public List<VaultEntry> getAllEntries() throws SQLException {
         List<VaultEntry> entries = new ArrayList<>();
-        String sql = "SELECT id, site_name, username, password_blob, iv, secure_notes, encrypted_document_content, original_file_name, password_history_blobs, password_history_ivs FROM vault";
+        String sql = "SELECT id, site_name, username, password_blob, iv, secure_notes, secure_notes_iv, encrypted_document_content, original_file_name, original_file_name_iv, password_history_blobs, password_history_ivs FROM vault";
         try (Connection conn = DatabaseHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -73,9 +65,11 @@ public class VaultDAO {
                             rs.getString("username"),
                             rs.getBytes("password_blob"),
                             rs.getBytes("iv"),
-                            rs.getString("secure_notes"),
+                            rs.getBytes("secure_notes"),
+                            rs.getBytes("secure_notes_iv"),
                             rs.getBytes("encrypted_document_content"),
-                            rs.getString("original_file_name"),
+                            rs.getBytes("original_file_name"),
+                            rs.getBytes("original_file_name_iv"),
                             historyBlobs,
                             historyIvs
                     ));
@@ -88,7 +82,7 @@ public class VaultDAO {
     }
 
     public void updateEntry(VaultEntry entry) throws SQLException {
-        String sql = "UPDATE vault SET site_name = ?, username = ?, password_blob = ?, iv = ?, secure_notes = ?, encrypted_document_content = ?, original_file_name = ?, password_history_blobs = ?, password_history_ivs = ? WHERE id = ?";
+        String sql = "UPDATE vault SET site_name = ?, username = ?, password_blob = ?, iv = ?, secure_notes = ?, secure_notes_iv = ?, encrypted_document_content = ?, original_file_name = ?, original_file_name_iv = ?, password_history_blobs = ?, password_history_ivs = ? WHERE id = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -96,15 +90,17 @@ public class VaultDAO {
             pstmt.setString(2, entry.getUsername());
             pstmt.setBytes(3, entry.getPasswordBlob());
             pstmt.setBytes(4, entry.getIv());
-            pstmt.setString(5, entry.getSecureNotes());
-            pstmt.setBytes(6, entry.getEncryptedDocumentContent());
-            pstmt.setString(7, entry.getOriginalFileName());
+            pstmt.setBytes(5, entry.getSecureNotes());
+            pstmt.setBytes(6, entry.getSecureNotesIv());
+            pstmt.setBytes(7, entry.getEncryptedDocumentContent());
+            pstmt.setBytes(8, entry.getOriginalFileName());
+            pstmt.setBytes(9, entry.getOriginalFileNameIv());
 
             // Serialize and set history lists
-            pstmt.setBytes(8, serializeList(entry.getPasswordHistoryBlobs()));
-            pstmt.setBytes(9, serializeList(entry.getPasswordHistoryIvs()));
+            pstmt.setBytes(10, serializeList(entry.getPasswordHistoryBlobs()));
+            pstmt.setBytes(11, serializeList(entry.getPasswordHistoryIvs()));
 
-            pstmt.setInt(10, entry.getId());
+            pstmt.setInt(12, entry.getId());
             pstmt.executeUpdate();
         } catch (IOException e) {
             throw new SQLException("Error serializing password history for update: " + e.getMessage(), e);
@@ -112,9 +108,6 @@ public class VaultDAO {
     }
 
     public void deleteEntry(int id) throws SQLException {
-        // When deleting an entry, we should also clean up its password history.
-        // This is handled by the foreign key constraint if we were using a separate history table.
-        // For a single table approach, we just delete the row.
         String sql = "DELETE FROM vault WHERE id = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -123,7 +116,7 @@ public class VaultDAO {
         }
     }
 
-    // Config methods (remain unchanged for now)
+    // Config methods
     public void setConfigValue(String key, byte[] value) throws SQLException {
         String sql = "INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value";
         try (Connection conn = DatabaseHelper.getConnection();
