@@ -7,12 +7,12 @@ Submitted in partial fulfillment of the requirements for the course
 **6th Semester**
 
 by
-**Md. Naharul Islam**  
-ID: 0322320105101036  
-**Md. Sabidur Rahman**  
-ID: 0322320105101021  
-**Biddut Roy**  
-ID: 0322310105101060  
+**Md Samiul Islam**  
+ID: 0322320105101001  
+**Simanto Kumar**  
+ID: 0322320105101003
+**Chanchal Kumar**  
+ID: 0322310105101055 
 
 Approved as to style and content by
 ............................................
