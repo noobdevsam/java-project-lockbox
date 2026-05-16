@@ -42,9 +42,9 @@ We would like to acknowledge the support and camaraderie of all our coursemates,
 
 Finally, our deepest gratitude goes to our beloved parents and everyone who directly or indirectly contributed their time, support, and encouragement in helping us accomplish this work.
 
-**Md. Naharul Islam**  
-**Md. Sabidur Rahman**  
-**Biddut Roy**
+**Md Samiul Islam**  
+**Simanto Kumar**  
+**Chanchal Kumar**
 
 ---
 
@@ -278,8 +278,10 @@ The LockBox project successfully delivered a high-integrity, local-first passwor
 ---
 
 ## REFERENCES
-1. **NIST Special Publication 800-63B:** Digital Identity Guidelines.
-2. **OWASP Password Storage Cheat Sheet:** Recommendations for PBKDF2.
-3. **SQLite Documentation:** Implementation of local storage.
-4. **Oracle JCA Reference Guide:** Implementation of Cipher and SecretKeyFactory.
-5. **FlatLaf Documentation:** Modern Look and Feel for Java Swing.
+1. **NIST.** (2017). *Digital Identity Guidelines: Authentication and Lifecycle Management (Special Publication 800-63B)*. National Institute of Standards and Technology.
+2. **OWASP.** (2024). *Password Storage Cheat Sheet*. Open Web Application Security Project.
+3. **SQLite.** (2026). *SQLite Documentation*. SQLite Consortium.
+4. **Oracle.** (2025). *Java Cryptography Architecture (JCA) Reference Guide*. Oracle Corporation.
+5. **FormDev Software.** (2025). *FlatLaf: Flat Look and Feel for Java Swing*. FlatLaf Documentation.
+6. **Xerial.** (2026). *sqlite-jdbc: SQLite JDBC Driver for Java*. GitHub Repository.
+7. **Bloch, J.** (2018). *Effective Java (3rd ed.)*. Addison-Wesley Professional.
